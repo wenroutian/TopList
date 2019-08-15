@@ -142,13 +142,17 @@ func (spider Spider) GetZhiHu() []map[string]interface{} {
 		fmt.Println("抓取" + spider.DataType + "失败")
 		return []map[string]interface{}{}
 	}
-	document.Find(".HotList-list .HotItem-content").Each(func(i int, selection *goquery.Selection) {
-		url, boolUrl := selection.Find("a").Attr("href")
+	document.Find(".HotList-list .HotItem").Each(func(i int, selection *goquery.Selection) {
+		url, boolUrl := selection.Find(".HotItem-content a").Attr("href")
 		text := selection.Find("h2").Text()
-		if boolUrl {
-			allData = append(allData, map[string]interface{}{"title": text, "url": url})
+		if boolUrl && strings.Contains(url, "question") {
+			image, _ := selection.Find(".HotItem-img img").Attr("src")
+			s := selection.Find(".HotItem-metrics")
+			hot := s.Before(".HotItem-action").After("svg").Text()
+			allData = append(allData, map[string]interface{}{"title": text, "url": url, "hot": hot, "image": image})
 		}
 	})
+
 	return allData
 }
 
@@ -349,7 +353,7 @@ func (spider Spider) GetHuPu() []map[string]interface{} {
 
 // Github
 func (spider Spider) GetGitHub() []map[string]interface{} {
-	url := "https://github.com/trending"
+	url := "https://github.com/trending/php?since=daily"
 	timeout := time.Duration(5 * time.Second) //超时时间5s
 	client := &http.Client{
 		Timeout: timeout,
@@ -357,38 +361,58 @@ func (spider Spider) GetGitHub() []map[string]interface{} {
 	var Body io.Reader
 	request, err := http.NewRequest("GET", url, Body)
 	if err != nil {
-		fmt.Println("抓取" + spider.DataType + "失败")
+		fmt.Println("抓取" + "失败")
 		return []map[string]interface{}{}
 	}
 	request.Header.Add("User-Agent", `Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36`)
 	res, err := client.Do(request)
 
 	if err != nil {
-		fmt.Println("抓取" + spider.DataType + "失败")
+		fmt.Println("抓取" + "失败")
 		return []map[string]interface{}{}
 	}
 	defer res.Body.Close()
-	//str,_ := ioutil.ReadAll(res.Body)
-	//fmt.Println(string(str))
 	var allData []map[string]interface{}
 	document, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		fmt.Println("抓取" + spider.DataType + "失败")
+		fmt.Println("抓取" + "失败")
 		return []map[string]interface{}{}
 	}
 
 	document.Find(".Box article").Each(func(i int, selection *goquery.Selection) {
 		s := selection.Find(".lh-condensed a")
-		//desc := selection.Find(".col-9 .text-gray .my-1 .pr-4")
-		//descText := desc.Text()
 		url, boolUrl := s.Attr("href")
-		text := s.Text()
+		text := trim(s.Text())
 		descText := selection.Find("p").Text()
+
+		category := selection.Find(".d-inline-block").AfterHtml("programmingLanguage").Find("span").Text()
+
+		var star, fork string
+
+		selection.Find(".muted-link").Each(func(i int, selection *goquery.Selection) {
+			if i == 0 {
+				star = trim(selection.Text())
+			}
+			if i == 1 {
+				fork = trim(selection.Text())
+			}
+		})
 		if boolUrl {
-			allData = append(allData, map[string]interface{}{"title": text, "desc": descText, "url": "https://github.com" + url})
+			allData = append(allData, map[string]interface{}{"title": strings.Trim(text, "\r\n"), "desc":
+			trim(descText), "url": "https://github.com" + url,
+				"category": category,
+				"star":     star,
+				"fork":     fork,
+			})
 		}
 	})
 	return allData
+}
+
+func trim(s string) string {
+	star := strings.Replace(s, "\n", "", -1)
+	star = strings.Replace(star, " ", "", -1)
+	return star
 }
 
 func (spider Spider) GetBaiDu() []map[string]interface{} {

@@ -17,7 +17,7 @@ func GetTypeInfo(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("系统错误" + err.Error())
 	}
 	id := r.Form.Get("id")
-	sql := "select str from hotData where id=" + id
+	sql := "select str from hotData2 where id=" + id
 	data := Common.MySql{}.GetConn().ExecSql(sql)
 	if len(data) == 0 {
 		fmt.Fprintf(w, "%s", `{"Code":1,"Message":"id错误，无该分类数据","Data":[]}`)
