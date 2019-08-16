@@ -399,7 +399,7 @@ func (spider Spider) GetGitHub() []map[string]interface{} {
 		})
 		if boolUrl {
 			allData = append(allData, map[string]interface{}{"title": strings.Trim(text, "\r\n"), "desc":
-			trim(descText), "url": "https://github.com" + url,
+			strings.Trim(descText, "\r\n"), "url": "https://github.com" + url,
 				"category": category,
 				"star":     star,
 				"fork":     fork,
