@@ -353,7 +353,7 @@ func (spider Spider) GetHuPu() []map[string]interface{} {
 
 // Github
 func (spider Spider) GetGitHub() []map[string]interface{} {
-	url := "https://github.com/trending/php?since=daily"
+	url := "https://github.com/trending"
 	timeout := time.Duration(5 * time.Second) //超时时间5s
 	client := &http.Client{
 		Timeout: timeout,
