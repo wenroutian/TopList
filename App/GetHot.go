@@ -1397,7 +1397,10 @@ func ExecGetData(spider Spider) {
 	data := dataType.Call(nil)
 	originData := data[0].Interface().([]map[string]interface{})
 	start := time.Now()
-	Common.MySql{}.GetConn().Where(map[string]string{"dataType": spider.DataType}).Update("hotData2", map[string]string{"str": SaveDataToJson(originData)})
+	if len(originData) > 0 {
+		Common.MySql{}.GetConn().Where(map[string]string{"dataType": spider.DataType}).Update("hotData2", map[string]string{"str": SaveDataToJson(originData)})
+
+	}
 	group.Done()
 	seconds := time.Since(start).Seconds()
 	fmt.Printf("耗费 %.2fs 秒完成抓取%s", seconds, spider.DataType)
