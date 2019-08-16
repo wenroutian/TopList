@@ -353,7 +353,7 @@ func (spider Spider) GetHuPu() []map[string]interface{} {
 
 // Github
 func (spider Spider) GetGitHub() []map[string]interface{} {
-	url := "https://github.com/trending/php?since=daily"
+	url := "https://github.com/trending"
 	timeout := time.Duration(5 * time.Second) //超时时间5s
 	client := &http.Client{
 		Timeout: timeout,
@@ -399,7 +399,7 @@ func (spider Spider) GetGitHub() []map[string]interface{} {
 		})
 		if boolUrl {
 			allData = append(allData, map[string]interface{}{"title": strings.Trim(text, "\r\n"), "desc":
-			trim(descText), "url": "https://github.com" + url,
+			strings.Trim(descText, "\r\n"), "url": "https://github.com" + url,
 				"category": category,
 				"star":     star,
 				"fork":     fork,
